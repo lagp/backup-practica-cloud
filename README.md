@@ -1,5 +1,7 @@
 # PRÁCTICAS MÓDULO CLOUD
 
+[![pipeline status](https://gitlab.com/cursos-repo/lemoncode/cloud/practica-cloud/badges/master/pipeline.svg)](https://gitlab.com/cursos-repo/lemoncode/cloud/practica-cloud/commits/master)
+
 ## Preparación
 
 * Cuenta de [Docker Hub](https://hub.docker.com/)

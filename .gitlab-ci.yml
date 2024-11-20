@@ -1,0 +1,60 @@
+services:
+  - docker:dind
+
+stages: 
+  - registry
+  - validate
+  - plan
+  - apply
+
+gitlab_registry:
+  image: docker:stable
+  stage: registry
+  only:
+    - master
+  script:
+    - echo "$GITLAB_REGISTRY_PASSWORD" | docker login registry.gitlab.com -u ${GITLAB_REGISTRY_USER} --password-stdin
+    - docker build -t registry.gitlab.com/cursos-repo/lemoncode/cloud/practica-cloud .
+    - docker push registry.gitlab.com/cursos-repo/lemoncode/cloud/practica-cloud
+
+terraform_validate:
+  image: hashicorp/terraform:light
+  stage: validate
+  before_script:
+    - cd deployment
+    - rm -rf .terraform
+    - terraform -version
+    - terraform init
+  script:
+    - terraform validate
+  only:
+    - master
+
+terraform_plan:
+  image: hashicorp/terraform:light
+  stage: plan
+  before_script:
+    - cd deployment
+    - rm -rf .terraform
+    - terraform -version
+    - terraform init
+  script:
+    - terraform plan --out "planfile"
+  dependencies:
+    - terraform_validate
+  artifacts:
+    paths:
+      - planfile
+
+terraform_apply:
+  image: hashicorp/terraform:light
+  stage: apply
+  before_script:
+    - cd deployment
+    - rm -rf .terraform
+    - terraform -version
+    - terraform init
+  script:
+    - terraform apply -input=false "planfile"
+  dependencies:
+    - terraform_plan
